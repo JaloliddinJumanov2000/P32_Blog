@@ -1,4 +1,5 @@
 from django.contrib.auth.decorators import login_required
+from django.http import HttpResponseForbidden
 from django.shortcuts import render, get_object_or_404, redirect
 from django.db.models import Q
 from blog.forms import BlogForms, CommentForm
@@ -56,29 +57,43 @@ def create(request):
     return render(request, 'blog/create.html', context=context)
 
 
+from django.shortcuts import render, get_object_or_404, redirect
+from .models import Blog, Comment
+from .forms import CommentForm
+
 def detail(request, blog_id):
     blog = get_object_or_404(Blog, id=blog_id)
-    comments = blog.comments.all()
-    comment_form = CommentForm(request.POST or None)
+    comments = Comment.objects.filter(blog=blog, parent=None).order_by('-created_at')
+
     if request.method == 'POST':
-        if comment_form.is_valid():
-            comment = comment_form.save(commit=False)
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            comment = form.save(commit=False)
             comment.user = request.user
             comment.blog = blog
+
+            # check if reply
+            parent_id = request.POST.get('parent_id')
+            if parent_id:
+                try:
+                    parent_comment = Comment.objects.get(id=parent_id)
+                    comment.parent = parent_comment
+                except Comment.DoesNotExist:
+                    pass
+
             comment.save()
             return redirect('detail', blog_id=blog.id)
+    else:
+        form = CommentForm()
 
-    user_like = Like.objects.filter(user=request.user, blog=blog).first()
-    if not user_like:
-        user_like = Like.objects.create(user=request.user, blog=blog)
     context = {
         'blog': blog,
-        "comments": comments,
-        "comment_form": comment_form,
-        "request_user_is_liked": user_like.is_liked,
-        "user_likes_count": list(blog.likes.values_list('is_liked', flat=True)).count(True)
+        'comments': comments,
+        'comment_form': form,
+        'user_likes_count': blog.comment_set.count(),  # example
+        'request_user_is_liked': False,  # false by default
     }
-    return render(request, 'blog/detail.html', context=context)
+    return render(request, 'blog/detail.html', context)
 
 
 def like_dislike(request, blog_id):
@@ -113,6 +128,38 @@ def delete(request, blog_id):
     blog = get_object_or_404(Blog, id=blog_id, author=request.user)
     blog.delete()
     return redirect('home')
+
+@login_required
+def comment_edit(request, comment_id):
+    comment = get_object_or_404(Comment, id=comment_id)
+
+    if request.user != comment.user:
+        return HttpResponseForbidden("You are not allowed to edit this comment.")
+
+    if request.method == 'POST':
+        form = CommentForm(request.POST, instance=comment)
+        if form.is_valid():
+            form.save()
+            return redirect('detail', blog_id=comment.blog.id)
+    else:
+        form = CommentForm(instance=comment)
+
+    return render(request, 'blog/comment_edit.html', {
+        'form': form,
+        'comment': comment,
+    })
+
+
+@login_required
+def comment_delete(request, comment_id):
+    comment = get_object_or_404(Comment, id=comment_id)
+
+    if request.user != comment.user:
+        return HttpResponseForbidden("You are not allowed to delete this comment.")
+
+    blog_id = comment.blog.id
+    comment.delete()
+    return redirect('detail', blog_id=blog_id)
 
 # lookup expr
 # > 3  field__gt = 3

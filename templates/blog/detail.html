@@ -24,73 +24,125 @@
     <p class="my-4">
         <a href="{% url 'blog_is_liked' blog.id %}" class="text-danger">{% if request_user_is_liked %}
             <i class="bi bi-heart-fill"></i>{% else %}<i class="bi bi-heart"></i>{% endif %}</a>
-        {{ user_likes_count }} likes  &nbsp;&nbsp;&nbsp;&nbsp;
-    <span class="ml-3"><i class="bi bi-chat-text"></i> {{ comments.count }} comments </span>
+        {{ user_likes_count }} likes &nbsp;&nbsp;&nbsp;&nbsp;
+        <span class="ml-3"><i class="bi bi-chat-text"></i> {{ comments.count }} comments </span>
 
     </p>
 
-    <!-- Comments -->
-    <div class="row d-flex justify-content-center">
-        <div class="col-md-12 col-lg-12">
-            <div class="card text-body" style="border: none;">
-                <div class="card-body" style="padding: 20px 0;">
-                    <div class="grid">
-                        <div class="row">
-                            <div class="col-1  d-flex justify-content-center">
-                                <img
-                                        class="rounded-circle shadow-1-strong"
-                                        src="{{ user.profile.image.url }}" alt="rasm"
-                                        width="60"
-                                        height="60"
-                                        style="object-fit: cover">
-                            </div>
-                            <div class="col-11">
-                                <form method="POST" action="{% url 'detail' blog.id %}">
-                                    {% csrf_token %}
-                                    {{ comment_form|crispy }}
-                                    <button type="submit" class="btn btn-primary float-end">Post comment</button>
-                                </form>
-
-                            </div>
+    <!-- Comments Section -->
+    <div class="container mt-4">
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-body">
+                <!-- New Comment Form -->
+                <div class="d-flex mb-4 align-items-start">
+                    <img src="{{ user.profile.image.url|default:'/static/img/default.jpg' }}"
+                         class="rounded-circle border shadow-sm me-3"
+                         width="50" height="50"
+                         style="object-fit: cover;">
+                    <form method="POST" action="{% url 'detail' blog.id %}" class="flex-grow-1">
+                        {% csrf_token %}
+                        <div class="mb-2">{{ comment_form|crispy }}</div>
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" class="btn btn-primary btn-sm rounded-pill px-4 shadow">
+                                <i class="bi bi-send-fill"></i> Post comment
+                            </button>
                         </div>
-                    </div>
-                    <hr>
+                    </form>
                 </div>
+                <hr>
 
-                <div class="" style="height: 400px; overflow-y: auto; ">
+                <!-- Comments List -->
+                <div style="max-height: 400px; overflow-y: auto;">
                     {% for comment in comments %}
-                        <div class="card-body p-4">
-                            <div class="d-flex flex-start">
-                                <img class="rounded-circle shadow-1-strong me-3"
-                                     src="{{ comment.user.profile.image.url }}" alt="avatar"
-                                     width="60"
-                                     height="60"
-                                     style="object-fit: cover"
-                                />
-                                <div>
-                                    <h6 class="fw-bold mb-1">{{ comment.user.username }}</h6>
-                                    <div class="d-flex align-items-center mb-3">
-                                        <p class="mb-0">
-                                            {{ comment.created_at|timesince }} ago
-                                        </p>
-                                        <a href="#!" class="link-muted"><i class="fas fa-pencil-alt ms-2"></i></a>
-                                        <a href="#!" class="text-success"><i class="fas fa-redo-alt ms-2"></i></a>
-                                        <a href="#!" class="link-danger"><i class="fas fa-heart ms-2"></i></a>
+                        <div class="mb-4">
+                            <div class="d-flex">
+                                <img src="{{ comment.user.profile.image.url|default:'/static/img/default.jpg' }}"
+                                     class="rounded-circle me-3" width="50" height="50" style="object-fit: cover;">
+                                <div class="w-100">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <h6 class="fw-bold mb-0">{{ comment.user.username }}</h6>
+                                        <small class="text-muted">{{ comment.created_at|timesince }} ago</small>
                                     </div>
-                                    <p class="mb-0">
-                                        {{ comment.message }}
-                                    </p>
+                                    <p class="mb-1">{{ comment.message }}</p>
+
+                                    <!-- Actions -->
+                                    <div class="d-flex gap-2 mb-2 flex-wrap align-items-center">
+                                        {% if request.user == comment.user %}
+                                            <a href="{% url 'comment_edit' comment.id %}"
+                                               class="btn btn-sm rounded-pill border">
+                                                ✏️ Edit
+                                            </a>
+                                            <a href="{% url 'comment_delete' comment.id %}"
+                                               class="btn btn-sm rounded-pill border"
+                                               onclick="return confirm('Are you sure you want to delete this comment?');">
+                                                🗑️ Delete
+                                            </a>
+                                        {% endif %}
+                                        <a class="btn btn-sm rounded-pill border"
+                                           data-bs-toggle="collapse"
+                                           href="#reply-{{ comment.id }}" role="button"
+                                           aria-expanded="false" aria-controls="reply-{{ comment.id }}">
+                                            💬 Reply ({{ comment.replies.count }})
+                                        </a>
+                                    </div>
+
+
+                                    <!-- Collapse Reply Form Block -->
+                                    <div class="collapse mt-2" id="reply-{{ comment.id }}">
+                                        <!-- Reply Form -->
+                                        <form method="POST" action="{% url 'detail' blog.id %}" class="mb-2">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="parent_id" value="{{ comment.id }}">
+                                            <div class="mb-2">{{ comment_form|crispy }}</div>
+                                            <button type="submit" class="btn btn-primary btn-sm rounded-pill px-4">
+                                                <i class="bi bi-reply-fill"></i> Reply
+                                            </button>
+                                        </form>
+                                    </div>
+
+
+                                    <!-- Replies -->
+                                    {% for reply in comment.replies.all %}
+                                        <div class="d-flex mt-3 ms-4">
+                                            <img src="{{ reply.user.profile.image.url|default:'/static/img/default.jpg' }}"
+                                                 class="rounded-circle me-2"
+                                                 width="40" height="40" style="object-fit: cover;">
+                                            <div class="w-100">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <h6 class="fw-semibold mb-0">{{ reply.user.username }}</h6>
+                                                    <small class="text-muted">{{ reply.created_at|timesince }}
+                                                        ago</small>
+                                                </div>
+                                                <p class="mb-1">{{ reply.message }}</p>
+
+                                                {% if request.user == reply.user %}
+                                                    <div class="d-flex gap-2 align-items-center flex-wrap mt-1">
+                                                        <a href="{% url 'comment_edit' reply.id %}"
+                                                           class="btn btn-sm rounded-pill border">
+                                                            ✏️ Edit
+                                                        </a>
+                                                        <a href="{% url 'comment_delete' reply.id %}"
+                                                           class="btn btn-sm rounded-pill border"
+                                                           onclick="return confirm('Are you sure you want to delete this reply?');">
+                                                            🗑️ Delete
+                                                        </a>
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+
                                 </div>
                             </div>
                         </div>
-                        <hr class="my-0"/>
+                        <hr>
+                        </div>
                     {% empty %}
-                        Empty Comments
+                        <p class="text-muted">No comments yet. Be the first to comment!</p>
                     {% endfor %}
-
-                </div>
-
             </div>
         </div>
     </div>
+    </div>
+
 {% endblock %}
