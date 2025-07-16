@@ -1,4 +1,5 @@
 {% load  static %}
+<!doctype html>
 <html lang="en" class="h-100">
 <head>
     <meta charset="UTF-8">
@@ -22,7 +23,7 @@
 
 <nav class="navbar navbar-expand-lg bg-body-tertiary">
     <div class="container">
-        <a class="navbar-brand" href="#">News Blog</a>
+        <a class="navbar-brand" href="#">Dj Blog</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
                 aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -85,7 +86,7 @@
         {% elif message.tags == 'warning' %}
             <i class="bi bi-exclamation-triangle-fill"></i>
         {% endif %}
-        <strong>{{ message.tags|upper }}: </strong> {{ message }}
+        <strong>{{ message.tags|upper}}: </strong> {{ message }}
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 {% endfor %}
@@ -110,3 +111,4 @@
 </body>
 </html>
 
+{# Template Block (DRY), bootstrap, ORM, urls, views, context #}

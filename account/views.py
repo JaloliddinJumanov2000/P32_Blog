@@ -1,5 +1,6 @@
 from django.contrib import messages
 from django.core.mail import send_mail
+from django.http import HttpResponse
 from django.shortcuts import render, redirect
 
 from account.forms import CustomUserCreationForm, CustomUserChangeForm, ProfileChangeForm
@@ -49,17 +50,18 @@ def change_profile(request):
 
 
 def test_send_mail(request):
-    subject = request.POST.get('Subject')
-    message = request.POST.get('Message')
-    to_email = request.POST.get('to_email')
+    subject = request.POST.get('subject')
+    message = request.POST.get('message')
+    to_email = request.POST.get('email')
     if request.method == 'POST':
         send_mail(
             subject,
             message,
-            "jumanovjaloliddin7@gmail.com",
+            'iamsolijonovasadbek@gmail.com',
             [to_email],
             fail_silently=True
         )
         return render(request, 'mail/send_mail_success.html')
+
     else:
         return render(request, 'mail/send_mail.html')
