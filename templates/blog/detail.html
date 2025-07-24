@@ -14,20 +14,18 @@
     <i class="bi bi-tags-fill"></i>
     <span class="badge rounded-pill text-bg-secondary"> #{{ blog.type }}</span>
     <p class="my-5">
-        {{ blog.content }}
+        {{ blog.content | safe }}
     </p>
     <p class="float-end">{{ blog.content|wordcount }} words</p>
-    {% if blog.photo %}
-        <img class="img-h-255" src="{{ blog.photo.url }}" alt="rasm">
-    {% endif %}
     <p class="my-2"><i class="bi bi-calendar2-date"></i> {{ blog.created_at|date:"D d M Y ⏰ f A" }} </p>
+
+    <!-- lIKE -->
     <p class="my-4">
-        <a href="{% url 'blog_is_liked' blog.id %}" class="text-danger">{% if request_user_is_liked %}
-            <i class="bi bi-heart-fill"></i>{% else %}<i class="bi bi-heart"></i>{% endif %}</a>
+        <a href="{% url 'blog_is_liked' blog.id %}" class="text-danger">{% if request_user_is_liked %}<i class="bi bi-heart-fill"></i>{% else %}<i class="bi bi-heart"></i>{% endif %}</a>
         {{ user_likes_count }} likes &nbsp;&nbsp;&nbsp;&nbsp;
         <span class="ml-3"><i class="bi bi-chat-text"></i> {{ comments.count }} comments </span>
-
     </p>
+
 
     <!-- Comments Section -->
     <div class="container mt-4">

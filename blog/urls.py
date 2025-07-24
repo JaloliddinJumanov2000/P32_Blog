@@ -1,5 +1,7 @@
 from django.urls import path
 from blog import views
+from django.conf.urls.i18n import i18n_patterns
+from django.urls import path, include
 
 urlpatterns = [
     path('', views.home, name='home'),
@@ -11,6 +13,5 @@ urlpatterns = [
     path('<int:blog_id>/is_liked', views.like_dislike, name='blog_is_liked'),
     path('comment/<int:comment_id>/edit/', views.comment_edit, name='comment_edit'),
     path('comment/<int:comment_id>/delete/', views.comment_delete, name='comment_delete'),
-
-
+    path("i18n/", include("django.conf.urls.i18n")),
 ]

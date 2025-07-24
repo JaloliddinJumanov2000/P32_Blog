@@ -1,4 +1,5 @@
 from django.db import models
+from django_ckeditor_5.fields import CKEditor5Field
 
 from config.settings import AUTH_USER_MODEL
 from django.contrib.auth import get_user_model
@@ -6,17 +7,20 @@ User = get_user_model()
 
 class Blog(models.Model):
     TYPES = {
-        "Journal": 'Journal',
-        "Life updates": "Life updates",
-        "Travel": "Travel",
-        "Personal development": "Personal development",
-        "IT": "IT"
+        "O'zbekiston": "O'zbekiston",
+        "Jahon": "Jahon",
+        "Iqtisodiyot": "Iqtisodiyot",
+        "Sport": "Sport",
+        "Fan-texnika": "Fan-texnika",
+        "Moliya": "Moliya",
+        "Ta'lim": "Ta'lim",
+        "Avto":"Avto",
     }
     author = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.CASCADE)  # lazy load
     title = models.CharField(max_length=200)
-    content = models.TextField()
+    content = CKEditor5Field('Text',config_name='extends')
     photo = models.ImageField(upload_to='blog_images', blank=True, null=True)
-    type = models.CharField(max_length=50, choices=TYPES, default="Journal")
+    type = models.CharField(max_length=50, choices=TYPES, default="O'zbekiston")
     created_at = models.DateTimeField(auto_now_add=True)
     published = models.BooleanField(default=True)
 

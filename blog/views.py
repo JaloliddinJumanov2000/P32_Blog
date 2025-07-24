@@ -2,25 +2,34 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseForbidden
 from django.shortcuts import render, get_object_or_404, redirect
 from django.db.models import Q
+from unicodedata import category
+
 from blog.forms import BlogForms, CommentForm
 from blog.models import Blog, Like
 
 
 @login_required
 def home(request):
-    blogs = Blog.objects.filter(published=True)
     search_published_blog = request.GET.get('search_published_blog')
+    type_filter = request.GET.get('category')  # URL'dan ?type=Sport kabi olamiz
+
+    blogs = Blog.objects.filter(published=True)
 
     if search_published_blog:
-        blogs = Blog.objects.filter(
-            Q(title__icontains=search_published_blog) | Q(content__icontains=search_published_blog),
-            published=True)
+        blogs = blogs.filter(
+            Q(title__icontains=search_published_blog) |
+            Q(content__icontains=search_published_blog)
+        )
+
+    if type_filter:
+        blogs = blogs.filter(type=type_filter)
 
     context = {
-        "blogs": blogs  # 'SELECT "blog_blog"."id", "blog_blog"."name" FROM "blog_blog"'
+        "blogs": blogs,
+        "active_type": type_filter,  # aktiv holatni belgilash uchun
     }
 
-    return render(request, 'blog/home.html', context=context)
+    return render(request, 'blog/home.html', context)
 
 
 @login_required
@@ -61,9 +70,18 @@ from django.shortcuts import render, get_object_or_404, redirect
 from .models import Blog, Comment
 from .forms import CommentForm
 
+
+from blog.models import Like  # Like modelini import qiling
+
 def detail(request, blog_id):
     blog = get_object_or_404(Blog, id=blog_id)
     comments = Comment.objects.filter(blog=blog, parent=None).order_by('-created_at')
+
+    # ✅ Like soni va user like bosganmi tekshiramiz
+    user_likes_count = blog.likes.filter(is_liked=True).count()
+    request_user_is_liked = False
+    if request.user.is_authenticated:
+        request_user_is_liked = Like.objects.filter(user=request.user, blog=blog, is_liked=True).exists()
 
     if request.method == 'POST':
         form = CommentForm(request.POST)
@@ -90,10 +108,11 @@ def detail(request, blog_id):
         'blog': blog,
         'comments': comments,
         'comment_form': form,
-        'user_likes_count': blog.comment_set.count(),  # example
-        'request_user_is_liked': False,  # false by default
+        'user_likes_count': user_likes_count,
+        'request_user_is_liked': request_user_is_liked,
     }
     return render(request, 'blog/detail.html', context)
+
 
 
 def like_dislike(request, blog_id):
@@ -129,6 +148,7 @@ def delete(request, blog_id):
     blog.delete()
     return redirect('home')
 
+
 @login_required
 def comment_edit(request, comment_id):
     comment = get_object_or_404(Comment, id=comment_id)
@@ -160,6 +180,11 @@ def comment_delete(request, comment_id):
     blog_id = comment.blog.id
     comment.delete()
     return redirect('detail', blog_id=blog_id)
+
+
+def tag_filter(request, tag_name):
+    blog = Blog.objects.get(name=tag_name)
+    return render(request, 'blog/home.html', context={'blog': blog})
 
 # lookup expr
 # > 3  field__gt = 3

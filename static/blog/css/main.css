@@ -1,3 +1,39 @@
 .img-h-255 {
     height: 255px;
 }
+
+
+.btn-green {
+    background-color: #198754; /* Yashil */
+    border: none;
+    color: white;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.btn-green:hover {
+    background-color: #157347;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn-success {
+    background: linear-gradient(to right, #28a745, #218838);
+    border: none;
+}
+.btn-success:hover {
+    background: linear-gradient(to right, #218838, #1e7e34);
+}
+
+
+.btn-outline-success:hover {
+    background: linear-gradient(to right, #28a745, #218838);
+    color: white;
+    border-color: transparent;
+}
+.btn-danger:hover {
+    background-color: #c82333;
+}
+
+

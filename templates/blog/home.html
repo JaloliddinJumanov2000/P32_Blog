@@ -5,30 +5,42 @@
 {% endblock %}
 
 {% block search %}
-    <form method="GET" class="d-flex" role="search">
-        <input name="search_published_blog" class="form-control me-2" type="search" placeholder="Published blogs"
-               aria-label="Search"/>
-        <button class="btn btn-outline-success" type="submit">Search</button>
+<div class="d-flex justify-content-center">
+    <form method="GET" class="d-flex w-100" style="max-width: 600px;" role="search">
+        <input name="search_published_blog" class="form-control rounded-start-pill shadow-sm me-0" type="search"
+               placeholder="Search published blogs..." aria-label="Search" />
+        <button class="btn btn-success rounded-end-pill px-4 shadow-sm" type="submit">
+            <i class="bi bi-search"></i> Search
+        </button>
     </form>
+</div>
+
+
 {% endblock %}
+
 
 {% block content %}
     <main>
-        {#Section#}
-        <section class="py-5 text-center container">
-            <div class="row py-lg-5">
-                <div class="col-lg-6 col-md-8 mx-auto"><h1 class="fw-light">Album example</h1>
-                    <p class="lead text-body-secondary">Something short and leading about the collection below—its
-                        contents,
-                        the creator, etc. Make it short and sweet, but not too short so folks don’t simply skip over it
-                        entirely.</p>
-                    <p><a href="#" class="btn btn-primary my-2">Main call to action</a>
-                        <a href="#" class="btn btn-secondary my-2">Secondary action</a></p></div>
+
+        <div class="container mt-4">
+
+            <div class="d-flex justify-content-between align-items-center flex-wrap mb-4">
+                <h2 class="fw-bold mb-3">Bloglar <span class="text-primary">{{ blogs.count }} ta</span></h2>
+                <a class="btn btn-outline-success rounded-pill" href="{% url 'create' %}">+ Add Blog</a>
             </div>
-        </section>
-        {#Blogs#}
-        <span class="fs-3 fw-medium container">Bloglar {{ blogs.count }} ta</span>
-        <a class="btn btn-outline-success float-end" href="{% url 'create' %}">+ Add Blog</a>
+
+            <!-- Kategoriya tugmalar (filtrlar) -->
+            <div class="d-flex flex-wrap gap-2 justify-content-center mb-5">
+                <a href="?category=O'zbekiston" class="btn btn-outline-success rounded-pill px-4">O'zbekiston</a>
+                <a href="?category=Jahon" class="btn btn-outline-success rounded-pill px-4">Jahon</a>
+                <a href="?category=Iqtisodiyot" class="btn btn-outline-success rounded-pill px-4">Iqtisodiyot</a>
+                <a href="?category=Sport" class="btn btn-outline-success rounded-pill px-4">Sport</a>
+                <a href="?category=Fan-texnika" class="btn btn-outline-success rounded-pill px-4">Fan-texnika</a>
+                <a href="?category=Moliya" class="btn btn-outline-success rounded-pill px-4">Moliya</a>
+                <a href="?category=Ta'lim" class="btn btn-outline-success rounded-pill px-4">Ta'lim</a>
+                <a href="?category=Avto" class="btn btn-outline-success rounded-pill px-4">Avto</a>
+            </div>
+        </div>
         <div class="album py-5 bg-body-tertiary mt-3">
             <div class="container">
                 <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
@@ -46,15 +58,15 @@
                                         <text x="35%" y="50%" fill="#eceeef" dy=".3em">{{ blog.title }}</text>
                                     </svg>
                                 {% endif %}
-                                <div class="card-body"><p class="card-text">{{ blog.content|truncatechars:70 }}</p>
+                                <div class="card-body"><p class="card-text">{{ blog.content| safe | truncatechars:70 }}</p>
                                     <div class="d-flex justify-content-between align-items-center">
                                         <div class="btn-group">
                                             <a href="{% url 'detail' blog.id %}" type="button"
                                                class="btn btn-sm btn-outline-secondary">View</a>
 
                                             {% if user == blog.author %}
-                                            <a href="{% url 'update' blog.id %}" type="button"
-                                               class="btn btn-sm btn-outline-secondary">Edit</a>
+                                                <a href="{% url 'update' blog.id %}" type="button"
+                                                   class="btn btn-sm btn-outline-secondary">Edit</a>
                                             {% endif %}
                                         </div>
                                         <small class="text-body-secondary">{{ blog.created_at|timesince }} ago</small>
@@ -65,6 +77,19 @@
                     {% endfor %}
                 </div>
             </div>
+
         </div>
+        {#Section#}
+        <section class="py-5 text-center container">
+            <div class="row py-lg-5">
+                <div class="col-lg-6 col-md-8 mx-auto"><h1 class="fw-light">Album example</h1>
+                    <p class="lead text-body-secondary">Something short and leading about the collection below—its
+                        contents,
+                        the creator, etc. Make it short and sweet, but not too short so folks don’t simply skip over it
+                        entirely.</p>
+                    <p><a href="#" class="btn btn-primary my-2">Main call to action</a>
+                        <a href="#" class="btn btn-secondary my-2">Secondary action</a></p></div>
+            </div>
+        </section>
     </main>
 {% endblock %}
