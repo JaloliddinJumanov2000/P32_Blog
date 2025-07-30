@@ -18,7 +18,7 @@ class BlogForms(ModelForm):
         self.fields['content'].required = False
 
 
-class CommentForm(forms.ModelForm):
+class CommentForm(ModelForm):
     class Meta:
         model = Comment
         fields = ['message']
